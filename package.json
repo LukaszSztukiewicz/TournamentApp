@@ -1,0 +1,27 @@
+{
+  "name": "tournament-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@picocss/pico": "^1.5.11",
+    "bcryptjs": "^2.4.3",
+    "iron-session": "^8.0.1",
+    "next": "14.1.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-toastify": "^10.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "prisma": "^5.8.1",
+    "prisma-generator-fake-data": "^0.13.0"
+  }
+}

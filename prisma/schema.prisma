@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dummy_data {
+    provider = "prisma-generator-fake-data"
+    output   = "./_auto_data-generators.js"
+}
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        BigInt      @id @default(autoincrement())
+
+  avatar      String
+  firstName      String
+  lastName      String
+  email     String   @unique
+  password  String
+  revealedPassword  String? //only used for dummy data generation
+  
+  hostedTournaments     Tournament[] @relation("TournamentHost")
+  registrations     Registration[] //Constraint - user can only be a player once per tournament - check on creation
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Tournament {
+  id        BigInt      @id @default(autoincrement())
+  
+  tournamentName      String
+  datetime      DateTime?
+  location      String?
+  discipline  String
+  maxPlayers      BigInt
+  applicationDeadline      DateTime
+    
+  hostId    BigInt
+  host      User     @relation("TournamentHost", fields: [hostId], references: [id])
+
+  sponsors     TournamentSponsor[]
+  registrations     Registration[]  //used to calculate number of ranked players and generate games
+  games     Game[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//One to One relationship
+model Registration {
+  id        BigInt      @id @default(autoincrement())
+  
+  playerId    BigInt
+  player      User     @relation(fields: [playerId], references: [id])
+  
+  tournamentId    BigInt
+  tournament      Tournament     @relation(fields: [tournamentId], references: [id])
+  
+  ranking      BigInt @unique
+  licenseNumber     BigInt @unique
+
+  playerGames     Game[] @relation("GamePlayer1")
+  playerGames2     Game[] @relation("GamePlayer2")
+  playerWins     Game[] @relation("GameWinner")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Game {
+  id        BigInt      @id @default(autoincrement())
+  
+  tournamentId    BigInt
+  tournament      Tournament     @relation(fields: [tournamentId], references: [id])
+  
+  player1Id    BigInt
+  player1      Registration     @relation("GamePlayer1", fields: [player1Id], references: [id])
+  
+  player2Id    BigInt
+  player2      Registration     @relation("GamePlayer2", fields: [player2Id], references: [id])
+  
+  winnerId    BigInt
+  winner      Registration     @relation("GameWinner", fields: [winnerId], references: [id])
+
+  scoreStatus     String @default("open") //open, confirmed, rejected
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+
+//Many to Many relationship
+model TournamentSponsor {
+  id        BigInt      @id @default(autoincrement())
+
+  sponsorId    BigInt
+  sponsor      Sponsor     @relation(fields: [sponsorId], references: [id])
+  
+  tournamentId    BigInt
+  tournament      Tournament     @relation(fields: [tournamentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Sponsor {
+  id        BigInt      @id @default(autoincrement())
+
+  name      String
+  logo     String
+  slogan     String?
+  website      String?
+  
+  tournaments     TournamentSponsor[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
